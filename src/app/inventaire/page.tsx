@@ -29,6 +29,7 @@ import ObjectCard from '@/components/ObjectCard'
 import CategoryChip from '@/components/CategoryChip'
 import { SharePreview } from '@/components/SharePreview'
 import Link from 'next/link'
+import CustomButton from '@/components/CustomButton'
 
 // Définition des catégories
 const CATEGORIES: Category[] = [
@@ -154,24 +155,13 @@ export default function Inventaire() {
       <Container maxW="container.xl" py={8}>
         {/* En-tête */}
         <VStack spacing={8} align="stretch" mb={8}>
-          <HStack justify="space-between">
-            <Heading
-              size="lg"
-              color="white"
-              fontFamily="serif"
-            >
-              Mon Inventaire
-            </Heading>
-            <Link href="/objets/nouveau" passHref>
-              <Button
-                leftIcon={<AddIcon />}
-                colorScheme="blue"
-                variant="solid"
-              >
-                Ajouter un objet
-              </Button>
-            </Link>
-          </HStack>
+          <Heading
+            size="lg"
+            color="white"
+            fontFamily="serif"
+          >
+            Mon Inventaire
+          </Heading>
 
           {/* Filtres */}
           <HStack spacing={4}>

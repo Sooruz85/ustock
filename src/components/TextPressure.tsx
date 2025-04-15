@@ -1,6 +1,8 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react';
+import { Global } from '@emotion/react';
+import { Box } from '@chakra-ui/react'
 
 interface TextPressureProps {
   text?: string;
@@ -17,6 +19,7 @@ interface TextPressureProps {
   strokeColor?: string;
   className?: string;
   minFontSize?: number;
+  pressure?: number;
 }
 
 const TextPressure = ({
@@ -34,6 +37,7 @@ const TextPressure = ({
   strokeColor = '#FF0000',
   className = '',
   minFontSize = 24,
+  pressure = 0,
 }: TextPressureProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -45,6 +49,7 @@ const TextPressure = ({
   const [fontSize, setFontSize] = useState(minFontSize);
   const [scaleY, setScaleY] = useState(1);
   const [lineHeight, setLineHeight] = useState(1);
+  const [dynamicClassName, setDynamicClassName] = useState('');
 
   const chars = text.split('');
 
@@ -155,88 +160,94 @@ const TextPressure = ({
     return () => cancelAnimationFrame(rafId);
   }, [width, weight, italic, alpha, chars.length]);
 
-  const dynamicClassName = [className, flex ? 'flex' : '', stroke ? 'stroke' : '']
-    .filter(Boolean)
-    .join(' ');
+  useEffect(() => {
+    const className = `pressure-${Math.floor(pressure)}`;
+    setDynamicClassName(className);
+  }, [pressure]);
+
+  const globalStyles = `
+    @font-face {
+      font-family: '${fontFamily}';
+      src: url('${fontUrl}');
+      font-style: normal;
+    }
+
+    .flex {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .stroke span {
+      position: relative;
+      color: ${textColor};
+    }
+
+    .stroke span::after {
+      content: attr(data-char);
+      position: absolute;
+      left: 0;
+      top: 0;
+      color: transparent;
+      z-index: -1;
+      -webkit-text-stroke-width: 3px;
+      -webkit-text-stroke-color: ${strokeColor};
+    }
+
+    .text-pressure-title {
+      color: ${textColor};
+    }
+  `;
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        position: 'relative',
-        width: '100%',
-        height: '100%',
-        background: 'transparent',
-      }}
-    >
-      <style>{`
-        @font-face {
-          font-family: '${fontFamily}';
-          src: url('${fontUrl}');
-          font-style: normal;
-        }
-
-        .flex {
-          display: flex;
-          justify-content: space-between;
-        }
-
-        .stroke span {
-          position: relative;
-          color: ${textColor};
-        }
-
-        .stroke span::after {
-          content: attr(data-char);
-          position: absolute;
-          left: 0;
-          top: 0;
-          color: transparent;
-          z-index: -1;
-          -webkit-text-stroke-width: 3px;
-          -webkit-text-stroke-color: ${strokeColor};
-        }
-
-        .text-pressure-title {
-          color: ${textColor};
-        }
-      `}</style>
-
-      <h1
-        ref={titleRef}
-        className={`text-pressure-title ${dynamicClassName}`}
+    <>
+      <Global styles={globalStyles} />
+      <div
+        ref={containerRef}
         style={{
-          fontFamily,
-          textTransform: 'uppercase',
-          fontSize: fontSize,
-          lineHeight,
-          transform: `scale(1, ${scaleY})`,
-          transformOrigin: 'center top',
-          margin: 0,
-          textAlign: 'center',
-          userSelect: 'none',
-          whiteSpace: 'nowrap',
-          fontWeight: 100,
+          position: 'relative',
           width: '100%',
+          height: '100%',
+          background: 'transparent',
         }}
       >
-        {chars.map((char, i) => (
-          <span
-            key={i}
-            ref={(el) => {
-              spansRef.current[i] = el;
-            }}
-            data-char={char}
-            style={{
-              display: 'inline-block',
-              color: stroke ? undefined : textColor
-            }}
-          >
-            {char}
-          </span>
-        ))}
-      </h1>
-    </div>
+        <Box
+          as="h1"
+          ref={titleRef}
+          className={`text-pressure-title ${dynamicClassName}`}
+          style={{
+            fontFamily,
+            textTransform: 'uppercase',
+            fontSize: fontSize,
+            lineHeight,
+            transform: `scale(1, ${scaleY})`,
+            transformOrigin: 'center top',
+            margin: 0,
+            textAlign: 'center',
+            userSelect: 'none',
+            whiteSpace: 'nowrap',
+            fontWeight: 100,
+            width: '100%',
+            color: 'white',
+          }}
+        >
+          {chars.map((char, i) => (
+            <span
+              key={i}
+              ref={(el) => {
+                spansRef.current[i] = el;
+              }}
+              data-char={char}
+              style={{
+                display: 'inline-block',
+                color: stroke ? undefined : textColor
+              }}
+            >
+              {char}
+            </span>
+          ))}
+        </Box>
+      </div>
+    </>
   );
 };
 

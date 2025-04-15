@@ -2,20 +2,40 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { Container, Heading, Text, VStack, Image, SimpleGrid, Box, Badge, Button, Flex, IconButton, useToast } from '@chakra-ui/react'
+import { 
+  Container, 
+  Heading, 
+  Text, 
+  VStack, 
+  Image, 
+  SimpleGrid, 
+  Box, 
+  Badge, 
+  Button, 
+  Flex, 
+  IconButton, 
+  useToast,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  useDisclosure,
+} from '@chakra-ui/react'
 import { ShareIcon } from '@/components/Icons'
-import type { Objet } from '@/types/database.types'
+import type { Objet, Platform } from '@/types/database.types'
+import { SharePreview } from '@/components/SharePreview'
 
 export default function ObjetDetail({ params }: { params: { id: string } }) {
   const [objet, setObjet] = useState<Objet | null>(null)
   const [loading, setLoading] = useState(true)
+  const [selectedPlatform, setSelectedPlatform] = useState<Platform>('SELENCY')
   const toast = useToast()
+  const { isOpen, onOpen, onClose } = useDisclosure()
 
   useEffect(() => {
     const fetchObjet = async () => {
       const { data, error } = await supabase
         .from('objets')
-        .select('*')
+        .select('*, images')
         .eq('id', params.id)
         .single()
 
@@ -30,21 +50,9 @@ export default function ObjetDetail({ params }: { params: { id: string } }) {
     fetchObjet()
   }, [params.id])
 
-  const handleShare = async () => {
+  const handleShare = () => {
     if (!objet) return
-    
-    try {
-      await navigator.clipboard.writeText(window.location.href)
-      toast({
-        title: "Lien copié !",
-        description: "Le lien a été copié dans votre presse-papiers.",
-        status: "success",
-        duration: 3000,
-        isClosable: true,
-      })
-    } catch (error) {
-      console.error('Failed to copy:', error)
-    }
+    onOpen()
   }
 
   if (loading) {
@@ -98,10 +106,10 @@ export default function ObjetDetail({ params }: { params: { id: string } }) {
 
           <SimpleGrid columns={[1, 2]} spacing={12}>
             <Box>
-              {objet.image_url ? (
+              {objet.images && objet.images.length > 0 ? (
                 <Image
-                  src={objet.image_url}
-                  alt={objet.titre}
+                  src={objet.images[0].url}
+                  alt={objet.images[0].alt || objet.titre}
                   borderRadius="lg"
                   objectFit="cover"
                   w="100%"
@@ -186,6 +194,24 @@ export default function ObjetDetail({ params }: { params: { id: string } }) {
           </SimpleGrid>
         </VStack>
       </Container>
+
+      {/* Modal de partage */}
+      <Modal isOpen={isOpen} onClose={onClose} size="2xl">
+        <ModalOverlay />
+        <ModalContent maxW="5xl" bg="transparent">
+          <SharePreview
+            objet={objet}
+            platforms={['VINTED', 'SELENCY', 'LEBONCOIN', 'GENSDECONFIANCE', 'EBAY']}
+            selectedPlatform={selectedPlatform}
+            onPlatformChange={setSelectedPlatform}
+            onShare={() => {
+              // Implémenter la logique de partage
+              onClose()
+            }}
+            onClose={onClose}
+          />
+        </ModalContent>
+      </Modal>
     </Box>
   )
 }

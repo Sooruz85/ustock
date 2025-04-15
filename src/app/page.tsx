@@ -6,6 +6,7 @@ import { Box, Container, Heading, Input, SimpleGrid, Card, CardBody, Text, Selec
 import { ShareIcon } from '@/components/Icons'
 import Link from 'next/link'
 import type { Objet } from '@/types/database.types'
+import Image from 'next/image'
 
 const CATEGORY_COLORS = [
   '#00BCD4', // Turquoise
@@ -21,63 +22,75 @@ const CATEGORIES = [
   { 
     label: 'SUZOU 305',
     value: 'art_19e_siecle',
-    image: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/305.svg',
+    color: '#00BCD4'
   },
   { 
     label: 'CAFETIÈRE',
     value: 'art_africain_oceanien',
-    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/cafetiere.svg',
+    color: '#FFC107'
   },
   { 
     label: 'TONGS',
     value: 'art_americain',
-    image: 'https://images.unsplash.com/photo-1624385392440-a3c9d4c15177?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/tong.svg',
+    color: '#FF9800'
   },
   { 
     label: 'HÔTEL',
     value: 'art_ancien_antiquites',
-    image: 'https://images.unsplash.com/photo-1582582494705-f8ce0b0c24f0?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/hotel.svg',
+    color: '#FF6F61'
   },
   { 
     label: 'DINO',
     value: 'art_moderne_contemporain_asiatique',
-    image: 'https://images.unsplash.com/photo-1619961310056-1f5c8df685d8?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/dino.svg',
+    color: '#009688'
   },
   { 
     label: 'CAFECITO',
     value: 'design',
-    image: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/cafe.svg',
+    color: '#FFB74D'
   },
   { 
     label: 'SOLEIL',
     value: 'photographies',
-    image: 'https://images.unsplash.com/photo-1532274402911-5a369e4c4bb5?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/soleil.svg',
+    color: '#D32F2F'
   },
   { 
     label: 'FLAMANT',
     value: 'sculptures_europeennes',
-    image: 'https://images.unsplash.com/photo-1561839561-b13bcfe95249?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/flamant.svg',
+    color: '#FF9800'
   },
   { 
     label: 'DOMINOS',
     value: 'bijoux',
-    image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/domino.svg',
+    color: '#D32F2F'
   },
   { 
     label: 'PALMIER',
     value: 'montres_horlogerie',
-    image: 'https://images.unsplash.com/photo-1619946794135-5bc917a27793?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/palmier.svg',
+    color: '#00BCD4'
   },
   { 
     label: 'COCKTAIL',
     value: 'livres_manuscrits',
-    image: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=80',
+    image: '/stamps/cocktail.svg',
+    color: '#FFB74D'
   },
   { 
     label: 'SURF',
     value: 'vins_spiritueux',
-    image: 'https://images.unsplash.com/photo-1569529465841-dfecdab7503b?w=500&auto=format&fit=crop&q=80',
-  },
+    image: '/stamps/surf.svg',
+    color: '#009688'
+  }
 ]
 
 // Style de dentelure de timbre amélioré
@@ -417,141 +430,83 @@ export default function Home() {
             </Alert>
           )}
           
-          {/* Carousel des catégories */}
-          <Box position="relative" w="100%" px={12}>
-            <IconButton
-              aria-label="Previous"
-              icon={<Text fontSize="2xl">←</Text>}
-              position="absolute"
-              left={0}
-              top="50%"
-              transform="translateY(-50%)"
-              onClick={prevSlide}
-              isDisabled={currentIndex === 0}
-              bg="white"
-              color="black"
-              _hover={{ bg: 'gray.100' }}
-              zIndex={2}
-            />
-            
-            <Box
-              ref={carouselRef}
-              overflow="hidden"
-              whiteSpace="nowrap"
-              css={{
-                '&::-webkit-scrollbar': {
-                  display: 'none'
-                },
-                scrollbarWidth: 'none'
-              }}
-            >
+          {/* Grille de timbres */}
+          <SimpleGrid 
+            columns={[2, 3, 4, 7]} 
+            spacing={4} 
+            w="full"
+            px={[4, 6, 8]}
+          >
+            {CATEGORIES.map((category, index) => (
               <Box
-                display="inline-flex"
-                gap={6}
-                px={4}
+                key={category.value}
+                position="relative"
+                bg={category.color}
+                overflow="hidden"
+                aspectRatio="0.7"
+                cursor="pointer"
+                role="group"
+                onClick={() => handleCategoryClick(category.value)}
+                sx={{
+                  mask: stampNotchStyle,
+                  WebkitMask: stampNotchStyle,
+                }}
+                _hover={{
+                  transform: 'scale(1.05)',
+                }}
+                transition="all 0.3s"
               >
-                {CATEGORIES.map((category, index) => (
-                  <Box
-                    key={category.value}
-                    display="inline-block"
-                    position="relative"
-                    overflow="hidden"
-                    w="250px"
-                    h="350px"
-                    flexShrink={0}
-                    cursor="pointer"
-                    role="group"
-                    onClick={() => handleCategoryClick(category.value)}
-                    sx={{
-                      mask: stampNotchStyle,
-                      WebkitMask: stampNotchStyle,
-                    }}
-                    _hover={{
-                      transform: 'scale(1.05)',
-                    }}
-                    transition="all 0.3s"
-                  >
-                    <Box
-                      position="absolute"
-                      top={0}
-                      left={0}
-                      right={0}
-                      bottom={0}
-                      backgroundImage={`url(${category.image})`}
-                      backgroundSize="cover"
-                      backgroundPosition="center"
-                      filter="sepia(1) hue-rotate(190deg)"
-                      opacity={0.8}
-                    />
-                    <Box
-                      position="absolute"
-                      top={0}
-                      left={0}
-                      right={0}
-                      bottom={0}
-                      bg="linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.7) 100%)"
-                    />
-                    <VStack 
-                      spacing={4} 
-                      height="100%" 
-                      justify="flex-end"
-                      position="relative"
-                      zIndex={1}
-                      p={6}
-                    >
-                      <Text
-                        fontSize="2xl"
-                        fontWeight="bold"
-                        color="white"
-                        textAlign="center"
-                        textShadow="2px 2px 4px rgba(0,0,0,0.5)"
-                      >
-                        {category.label}
-                      </Text>
-                    </VStack>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-
-            <IconButton
-              aria-label="Next"
-              icon={<Text fontSize="2xl">→</Text>}
-              position="absolute"
-              right={0}
-              top="50%"
-              transform="translateY(-50%)"
-              onClick={nextSlide}
-              isDisabled={currentIndex === CATEGORIES.length - 1}
-              bg="white"
-              color="black"
-              _hover={{ bg: 'gray.100' }}
-              zIndex={2}
-            />
-
-            {/* Indicateurs de position */}
-            <HStack justify="center" mt={4} spacing={2}>
-              {CATEGORIES.map((_, index) => (
                 <Box
-                  key={index}
-                  w={2}
-                  h={2}
-                  borderRadius="full"
-                  bg={index === currentIndex ? "white" : "whiteAlpha.400"}
-                  cursor="pointer"
-                  onClick={() => {
-                    setCurrentIndex(index)
-                    if (carouselRef.current) {
-                      carouselRef.current.scrollTo({
-                        left: index * 280,
-                        behavior: 'smooth'
-                      })
-                    }
-                  }}
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  right={0}
+                  bottom={0}
+                  opacity={0.2}
+                  backgroundImage="repeating-linear-gradient(-45deg, currentColor, currentColor 1px, transparent 1px, transparent 6px)"
                 />
-              ))}
-            </HStack>
-          </Box>
+                <VStack 
+                  spacing={4} 
+                  height="100%" 
+                  justify="center"
+                  position="relative"
+                  zIndex={1}
+                  p={4}
+                >
+                  <Box
+                    w="60%"
+                    h="60%"
+                    position="relative"
+                    style={{
+                      filter: 'brightness(0.8) contrast(1.2)',
+                      mixBlendMode: 'multiply'
+                    }}
+                  >
+                    <Image
+                      src={category.image}
+                      alt={category.label}
+                      fill
+                      style={{
+                        objectFit: 'contain'
+                      }}
+                    />
+                  </Box>
+                  <Text
+                    fontSize={["xs", "sm"]}
+                    fontWeight="bold"
+                    color="currentColor"
+                    textAlign="center"
+                    style={{
+                      opacity: 0.8,
+                      mixBlendMode: 'multiply'
+                    }}
+                  >
+                    {category.label}
+                  </Text>
+                </VStack>
+              </Box>
+            ))}
+          </SimpleGrid>
 
           {/* Barre de recherche */}
           <HStack spacing={4} justify="center" w="100%">

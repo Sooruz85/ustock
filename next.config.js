@@ -18,6 +18,22 @@ const nextConfig = {
   // Configurations supplémentaires
   poweredByHeader: false,
   compress: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
+      {
+        protocol: 'https',
+        hostname: 'raw.githubusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+      }
+    ],
+  },
 }
 
 module.exports = nextConfig 

@@ -1,18 +1,22 @@
 export interface Objet {
   id: string
   titre: string
-  description: string | null
-  artiste: string | null
-  dimensions: string | null
-  technique: string | null
-  date_creation: string | null
-  estimation_min: number | null
-  estimation_max: number | null
-  image_url: string | null
-  created_at: string
-  updated_at: string
-  created_by: string | null
+  description?: string
+  artiste?: string
   categorie: string | null
+  technique?: string
+  dimensions?: string
+  date_creation?: string
+  estimation_min?: number
+  estimation_max?: number
+  images?: {
+    url: string
+    alt?: string
+    order?: number
+  }[]
+  created_at?: string
+  updated_at?: string
+  user_id?: string
 }
 
 export interface Categorie {
@@ -27,4 +31,13 @@ export interface Statistiques {
   type: string
   valeur: number
   date: string
-} 
+}
+
+export interface Category {
+  value: string
+  label: string
+  image?: string
+  color?: string
+}
+
+export type Platform = 'VINTED' | 'SELENCY' | 'LEBONCOIN' | 'GENSDECONFIANCE' | 'EBAY' 

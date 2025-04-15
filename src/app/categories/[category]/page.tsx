@@ -1,155 +1,104 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Box, Container, Heading, SimpleGrid, Text, Button, Spinner, Center } from '@chakra-ui/react'
 import { supabase } from "@/lib/supabase"
-import { Box, Container, Heading, SimpleGrid, Card, CardBody, Text, VStack, Button } from '@chakra-ui/react'
+import { CATEGORIES } from '@/app/constants'
 import Link from 'next/link'
-import type { Objet } from '@/types/database.types'
+import { Objet } from '@/types/database.types'
+import ObjectCard from '@/components/ObjectCard'
 
-const CATEGORIES = {
-  art_19e_siecle: 'Art du 19e Siècle',
-  art_africain_oceanien: 'Art Africain',
-  art_americain: 'Art Américain',
-  art_ancien_antiquites: 'Antiquités',
-  art_moderne_contemporain_asiatique: 'Art Asiatique',
-  design: 'Design',
-  photographies: 'Photographies',
-  sculptures_europeennes: 'Sculptures',
-  bijoux: 'Bijoux',
-  montres_horlogerie: 'Montres',
-  livres_manuscrits: 'Livres',
-  vins_spiritueux: 'Vins'
+interface CategoryPageProps {
+  params: {
+    category: string;
+  };
 }
 
-export default function CategoryPage({ params }: { params: { category: string } }) {
-  const [objets, setObjets] = useState<Objet[]>([])
+export default function CategoryPage({ params }: CategoryPageProps) {
+  const [objects, setObjects] = useState<Objet[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const category = CATEGORIES[params.category]
+
   useEffect(() => {
+    if (!category) {
+      setError("Catégorie non trouvée")
+      setLoading(false)
+      return
+    }
     fetchObjets()
-  }, [params.category])
+  }, [category])
 
   const fetchObjets = async () => {
-    setLoading(true)
     try {
+      setLoading(true)
+      setError(null)
+
       const { data, error } = await supabase
         .from('objets')
-        .select('*')
+        .select(`
+          *,
+          images
+        `)
         .eq('categorie', params.category)
 
       if (error) {
-        console.error('Error fetching objets:', error)
-        setError(`Erreur lors de la récupération des objets: ${error.message}`)
-        return
+        throw error
       }
 
-      setObjets(data || [])
-    } catch (error) {
-      console.error('Error in fetchObjets:', error)
-      setError('Erreur lors de la récupération des objets')
+      console.log('Objets reçus:', data)
+      setObjects(data || [])
+    } catch (err) {
+      console.error('Erreur lors de la récupération des objets:', err)
+      setError("Une erreur est survenue lors du chargement des objets")
     } finally {
       setLoading(false)
     }
   }
 
-  const categoryName = CATEGORIES[params.category as keyof typeof CATEGORIES] || params.category
+  if (!category) {
+    return (
+      <Container maxW="container.xl" py={8}>
+        <Text color="red.500">Catégorie non trouvée</Text>
+        <Button as={Link} href="/" mt={4}>
+          Retour à la collection
+        </Button>
+      </Container>
+    )
+  }
 
   return (
-    <Box bg="#000D4D" minH="100vh" py={16}>
-      <Container maxW="container.xl">
-        <VStack spacing={12}>
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <Button
-              variant="outline"
-              color="white"
-              _hover={{ bg: 'whiteAlpha.200' }}
-              leftIcon={<span>←</span>}
-            >
-              Retour à la collection
-            </Button>
-          </Link>
+    <Container maxW="container.xl" py={8}>
+      <Box mb={8}>
+        <Heading as="h1" size="xl" color={category.color}>
+          {category.label}
+        </Heading>
+        <Button as={Link} href="/" mt={4}>
+          Retour à la collection
+        </Button>
+      </Box>
 
-          <Heading
-            fontSize="6xl"
-            fontFamily="serif"
-            fontWeight="light"
-            color="white"
-            textAlign="center"
-          >
-            {categoryName}
-          </Heading>
-
-          <Box w="100%" bg="white" p={8} borderRadius="xl">
-            {loading ? (
-              <Text textAlign="center" fontSize="xl">Chargement des objets...</Text>
-            ) : objets.length === 0 ? (
-              <VStack spacing={4}>
-                <Text textAlign="center" fontSize="xl">Aucun objet dans cette catégorie</Text>
-                <Link href="/objets/nouveau">
-                  <Button colorScheme="blue">Ajouter un objet</Button>
-                </Link>
-              </VStack>
-            ) : (
-              <SimpleGrid columns={[1, 2, 3, 4]} spacing={6}>
-                {objets.map((objet) => (
-                  <Card
-                    key={objet.id}
-                    overflow="hidden"
-                    variant="outline"
-                    _hover={{
-                      transform: 'translateY(-4px)',
-                      shadow: 'lg',
-                    }}
-                    transition="all 0.2s"
-                    as={Link}
-                    href={`/objets/${objet.id}`}
-                  >
-                    <Box position="relative" height="250px">
-                      {objet.image_url ? (
-                        <Box
-                          as="img"
-                          src={objet.image_url}
-                          alt={objet.titre}
-                          objectFit="cover"
-                          w="100%"
-                          h="100%"
-                        />
-                      ) : (
-                        <Box
-                          bg="gray.100"
-                          w="100%"
-                          h="100%"
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
-                        >
-                          <Text color="gray.500">Aucune image</Text>
-                        </Box>
-                      )}
-                    </Box>
-                    <CardBody>
-                      <VStack align="start" spacing={2}>
-                        <Heading size="md">{objet.titre}</Heading>
-                        {objet.artiste && (
-                          <Text fontSize="sm" color="gray.600">
-                            {objet.artiste}
-                          </Text>
-                        )}
-                        {objet.date_creation && (
-                          <Text fontSize="sm" color="gray.600">
-                            {objet.date_creation}
-                          </Text>
-                        )}
-                      </VStack>
-                    </CardBody>
-                  </Card>
-                ))}
-              </SimpleGrid>
-            )}
-          </Box>
-        </VStack>
-      </Container>
-    </Box>
+      {loading ? (
+        <Center py={8}>
+          <Spinner size="xl" />
+        </Center>
+      ) : error ? (
+        <Text color="red.500">{error}</Text>
+      ) : objects.length === 0 ? (
+        <Box textAlign="center" py={8}>
+          <Text mb={4}>Aucun objet dans cette catégorie</Text>
+          <Button as={Link} href="/objets/nouveau" colorScheme="blue">
+            Ajouter un objet
+          </Button>
+        </Box>
+      ) : (
+        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={8}>
+          {objects.map((objet) => (
+            <ObjectCard key={objet.id} objet={objet} />
+          ))}
+        </SimpleGrid>
+      )}
+    </Container>
   )
 } 

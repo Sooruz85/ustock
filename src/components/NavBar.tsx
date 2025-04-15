@@ -20,7 +20,7 @@ export default function NavBar() {
   const navItems = [
     { path: '/inventaire', label: 'Mon Inventaire' },
     { path: '/objets/nouveau', label: 'Ajouter un Objet' },
-    { path: '/ventes', label: 'Suivi des Ventes' },
+    { path: '/suivi-ventes', label: 'Suivi des Ventes' },
   ]
 
   return (

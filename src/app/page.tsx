@@ -213,7 +213,7 @@ export default function Home() {
           </Link>
 
           {/* Section Mes Ventes */}
-          <Link href="/ventes" passHref>
+          <Link href="/suivi-ventes" passHref>
             <Box
               bg="white"
               p={6}
